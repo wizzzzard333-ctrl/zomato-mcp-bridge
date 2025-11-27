@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍕 Zomato AI Order</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item strong {
+            color: #667eea;
+        }
+
+        .coupon {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .payment-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .payment-link:hover {
+            background: #218838;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .quick-orders {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-btn {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .emoji {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍕 Zomato AI Order</h1>
+        <p class="subtitle">Order food with AI assistance</p>
+
+        <div class="quick-orders">
+            <div class="quick-btn" onclick="quickOrder('Pizza', 'Dominos')">
+                <div class="emoji">🍕</div>
+                Pizza
+            </div>
+            <div class="quick-btn" onclick="quickOrder('Burger', 'McDonalds')">
+                <div class="emoji">🍔</div>
+                Burger
+            </div>
+            <div class="quick-btn" onclick="quickOrder('Biryani', 'Paradise')">
+                <div class="emoji">🍛</div>
+                Biryani
+            </div>
+            <div class="quick-btn" onclick="quickOrder('Chinese', 'Mainland China')">
+                <div class="emoji">🍜</div>
+                Chinese
+            </div>
+        </div>
+
+        <form id="orderForm">
+            <div class="input-group">
+                <label for="restaurant">🏪 Restaurant Name</label>
+                <input type="text" id="restaurant" placeholder="e.g., Domino's, McDonald's" required>
+            </div>
+
+            <div class="input-group">
+                <label for="items">🍽️ What to Order</label>
+                <textarea id="items" placeholder="e.g., 2 Margherita Pizza, 1 Garlic Bread" required></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="location">📍 Location/City</label>
+                <input type="text" id="location" placeholder="e.g., Mumbai, Delhi" required>
+            </div>
+
+            <div class="input-group">
+                <label for="address">🏠 Delivery Address</label>
+                <textarea id="address" placeholder="Full delivery address" required></textarea>
+            </div>
+
+            <button type="submit" class="btn" id="orderBtn">
+                🚀 Place Order
+            </button>
+
+            <button type="button" class="btn" onclick="searchRestaurants()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                🔍 Search Restaurants
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your order...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://mcp-server.zomato.com/mcp';
+
+        function quickOrder(item, restaurant) {
+            document.getElementById('restaurant').value = restaurant;
+            document.getElementById('items').value = item;
+        }
+
+        async function searchRestaurants() {
+            const location = document.getElementById('location').value;
+            const query = document.getElementById('restaurant').value || 'restaurants';
+
+            if (!location) {
+                showError('Please enter a location first');
+                return;
+            }
+
+            showLoading();
+            hideError();
+            hideResult();
+
+            try {
+                const response = await fetch(`${API_URL}/search?query=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}`);
+                const data = await response.json();
+
+                hideLoading();
+
+                if (data.success && data.restaurants) {
+                    showRestaurants(data.restaurants);
+                } else {
+                    showError('No restaurants found. Try different search terms.');
+                }
+            } catch (error) {
+                hideLoading();
+                showError('Search failed. Using demo data for now.');
+                showDemoRestaurants();
+            }
+        }
+
+        function showRestaurants(restaurants) {
+            const resultDiv = document.getElementById('result');
+            let html = '<h3>🏪 Available Restaurants</h3>';
+
+            restaurants.forEach(restaurant => {
+                html += `
+                    <div class="result-item">
+                        <strong>${restaurant.name}</strong><br>
+                        ${restaurant.cuisine || ''}<br>
+                        Rating: ${restaurant.rating || 'N/A'} ⭐<br>
+                        <button class="quick-btn" onclick="selectRestaurant('${restaurant.name}')" style="margin-top: 10px; width: 100%;">
+                            Select This Restaurant
+                        </button>
+                    </div>
+                `;
+            });
+
+            resultDiv.innerHTML = html;
+            resultDiv.classList.add('show');
+        }
+
+        function showDemoRestaurants() {
+            const demoRestaurants = [
+                { name: "Domino's Pizza", cuisine: "Pizza, Fast Food", rating: "4.2" },
+                { name: "McDonald's", cuisine: "Burgers, Fast Food", rating: "4.0" },
+                { name: "KFC", cuisine: "Chicken, Fast Food", rating: "4.1" },
+                { name: "Subway", cuisine: "Sandwiches, Healthy", rating: "4.3" }
+            ];
+            showRestaurants(demoRestaurants);
+        }
+
+        function selectRestaurant(name) {
+            document.getElementById('restaurant').value = name;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const restaurant = document.getElementById('restaurant').value;
+            const items = document.getElementById('items').value.split(',').map(i => i.trim());
+            const location = document.getElementById('location').value;
+            const address = document.getElementById('address').value;
+
+            showLoading();
+            hideError();
+            hideResult();
+
+            try {
+                const response = await fetch(`${API_URL}/order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        restaurant,
+                        items,
+                        location,
+                        address
+                    })
+                });
+
+                const data = await response.json();
+
+                hideLoading();
+
+                if (data.success) {
+                    showOrderSuccess(data);
+                } else {
+                    showError(data.error || 'Order failed. Please try again.');
+                }
+            } catch (error) {
+                hideLoading();
+                showError('Connection error. Showing demo order confirmation.');
+                showDemoOrder(restaurant, items, location);
+            }
+        });
+
+        function showOrderSuccess(data) {
+            const resultDiv = document.getElementById('result');
+            let html = '<h3>✅ Order Placed Successfully!</h3>';
+
+            html += `
+                <div class="result-item">
+                    <strong>Order ID:</strong> ${data.orderId || 'DEMO-' + Math.random().toString(36).substr(2, 9)}<br>
+                    <strong>Total Amount:</strong> ₹${data.totalAmount || 'TBD'}<br>
+                    <strong>Estimated Delivery:</strong> ${data.estimatedDelivery || '30-40 mins'}
+                </div>
+            `;
+
+            if (data.coupons && data.coupons.length > 0) {
+                html += '<h3>🎟️ Available Coupons</h3>';
+                data.coupons.forEach(coupon => {
+                    html += `
+                        <div class="result-item coupon">
+                            <strong>${coupon.code}</strong><br>
+                            ${coupon.description}<br>
+                            Save: ${coupon.discount}
+                        </div>
+                    `;
+                });
+            }
+
+            if (data.paymentLink) {
+                html += `<a href="${data.paymentLink}" class="payment-link" target="_blank">💳 Complete Payment</a>`;
+            }
+
+            resultDiv.innerHTML = html;
+            resultDiv.classList.add('show');
+        }
+
+        function showDemoOrder(restaurant, items, location) {
+            const demoData = {
+                success: true,
+                orderId: 'DEMO-' + Math.random().toString(36).substr(2, 9),
+                totalAmount: Math.floor(Math.random() * 500) + 200,
+                estimatedDelivery: '30-40 mins',
+                coupons: [
+                    { code: 'FIRST50', description: 'First order discount', discount: '50% off' },
+                    { code: 'SAVE100', description: 'Flat discount', discount: '₹100 off' }
+                ],
+                paymentLink: 'https://zomato.com/checkout/demo'
+            };
+            showOrderSuccess(demoData);
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('orderBtn').disabled = true;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+            document.getElementById('orderBtn').disabled = false;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        function hideResult() {
+            document.getElementById('result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
