@@ -1,0 +1,16 @@
+{
+  "name": "zomato-mcp-bridge",
+  "version": "1.0.0",
+  "description": "AI-powered Zomato ordering bridge with MCP integration",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@modelcontextprotocol/sdk": "^0.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
